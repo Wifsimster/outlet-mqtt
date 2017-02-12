@@ -2,42 +2,34 @@ require('config')
 
 ip = wifi.sta.getip()
 
-print('Starting web server')
-srv=net.createServer(net.TCP)
+TOPIC = "/sensors/relay/data"
 
-gpio.write(DATA_PIN, gpio.HIGH);
+-- Init client with keepalive timer 120sec
+m = mqtt.Client(CLIENT_ID, 120, "", "")
 
-srv:listen(80, function(conn)
-    conn:on("receive", function(client,request)
-        --print(request)        
-        local _, _, method, path, vars = string.find(request, "([A-Z]+) (.+)?(.+) HTTP");
-        if(method == nil)then
-            _, _, method, path = string.find(request, "([A-Z]+) (.+) HTTP");
-        end
-        local _GET = {}
-        if (vars ~= nil)then
-            for k, v in string.gmatch(vars, "(%w+)=(%w+)&*") do
-                _GET[k] = v
-            end
-        end
-  
-        local _on,_off = "",""
-        if(_GET.state == "ON")then
-            print('on')
-            gpio.write(DATA_PIN, gpio.HIGH);
-        elseif(_GET.state == "OFF")then
-            print('off')
-            gpio.write(DATA_PIN, gpio.LOW);
-        elseif(_GET.state == "RST")then
-            node.restart();
-        end
- 
-        -- Cloture de la session
-        local response = "HTTP/1.1 200 OK\r\n\r\nOK"
-        conn:send(response, function()
-            conn:close()
-        end)
-        collectgarbage();        
-    end)
+ip = wifi.sta.getip()
+
+m:lwt("/offline", '{"message":"'..CLIENT_ID..'", "topic":"'..TOPIC..'", "ip":"'..ip..'"}', 0, 0)
+
+print("Connecting to MQTT: "..BROKER_IP..":"..BROKER_PORT.."...")
+m:connect(BROKER_IP, BROKER_PORT, 0, 1, function(conn)
+    print("Connected to MQTT: "..BROKER_IP..":"..BROKER_PORT.." as "..CLIENT_ID)    
+     m:subscribe(TOPIC, 2, function(m)
+        print("Successfully subscribed to the topic: "..TOPIC)
+    end)    
 end)
 
+m:on("message", function(m, topic, data)
+    if data ~=nil then
+        print(data)
+        if data ~= nil then
+            if data == "ON" then
+              gpio.write(DATA_PIN, gpio.HIGH);
+            elseif data == "OFF" then
+              gpio.write(DATA_PIN, gpio.LOW);
+            elseif data == "RESET" then
+              node.restart();
+            end
+        end
+    end
+end)
