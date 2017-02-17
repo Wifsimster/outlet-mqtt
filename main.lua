@@ -1,5 +1,8 @@
 require('config')
 
+uart.setup(0, 9600, 8, 0, 1)
+uart.write(0, 0xA0, 0x01, 0x01, 0xA2)
+
 ip = wifi.sta.getip()
 
 TOPIC = "/sensors/relay/data"
@@ -21,10 +24,10 @@ m:on("message", function(m, topic, data)
     if data then
         print(data)
         if data == "ON" then
-            uart.setup(0, 9600, 8, 0, 1)
-            uart.write(0, 0xA0, 0x01, 0x01, 0xA2)          
+            --uart.setup(0, 9600, 8, 0, 1)
+            uart.write(0, 0xA0, 0x01, 0x01, 0xA2)
         elseif data == "OFF" then
-            uart.setup(0, 9600, 8, 0, 1)
+            --uart.setup(0, 9600, 8, 0, 1)
             uart.write(0, 0xA0, 0x01, 0x00, 0xA1)
         elseif data == "RESET" then
             node.restart()

@@ -4,12 +4,8 @@ print("Starting ESP"..node.chipid().."...")
 
 wifi.setmode(wifi.STATION)
 wifi.sta.config(AP,PWD)
---wifi.sta.connect()
 
 print('MAC address:', wifi.sta.getmac())
-
-local joinCounter = 0
-local joinMaxAttempts = 60
 
 tmr.create():alarm(1000, tmr.ALARM_AUTO, function(cb_timer)
     if wifi.sta.getip() == nil then
