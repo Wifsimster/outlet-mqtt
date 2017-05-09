@@ -4,7 +4,7 @@ This LUA script is for ESP8266 hardware.
 
 ## Description
 
-Switch command with an ESP8266 through a MQTT broker
+Switch command with an ESP8266 (UART) through a MQTT broker
 
 ## Files
 
