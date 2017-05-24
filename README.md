@@ -1,5 +1,6 @@
 # Outlet MQTT
 
+> This code need to be tested !
 > This LUA script is for ESP8266 hardware.
 
 ## Description
